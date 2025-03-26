@@ -1,0 +1,5 @@
+/users/migrations/
+/storage/migrations/
+/media/*
+/.idea/
+.env

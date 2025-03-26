@@ -1,0 +1,30 @@
+# version: '3.9'
+
+# Общие настройки
+networks:
+  mycloud-network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mycloud_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: mycloud_admin
+      POSTGRES_PASSWORD: 5tr0ngP@ss
+      POSTGRES_DB: mycloud_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mycloud-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U mycloud_admin -d mycloud_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
