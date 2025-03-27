@@ -3,7 +3,8 @@ from functools import wraps
 
 logger = logging.getLogger("core")
 
-def log_action(action: str = ""):
+
+def log_action(action: str):
     def decorator(view_method):
         @wraps(view_method)
         def wrapper(self, request, *args, **kwargs):
@@ -17,5 +18,7 @@ def log_action(action: str = ""):
             except Exception as e:
                 logger.warning(f"[{username}] ❌ {action} — ошибка: {str(e)}")
                 raise
+
         return wrapper
+
     return decorator

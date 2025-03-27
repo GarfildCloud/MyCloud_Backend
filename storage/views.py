@@ -38,11 +38,13 @@ class FileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
+    @log_action("скачивание файла владельцем/админом")
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return FileSerializer
         return FileUpdateSerializer
 
+    @log_action("скачивание файла владельцем/админом")
     def get_object(self):
         file = super().get_object()
         user = self.request.user
@@ -75,6 +77,7 @@ class FileDownloadView(APIView):
 class FilePublicDownloadView(APIView):
     permission_classes = []  # доступ для всех
 
+    @log_action("скачивание файла по public ссылке")
     def get(self, request, link_uuid):
         try:
             file = File.objects.get(special_link=link_uuid)

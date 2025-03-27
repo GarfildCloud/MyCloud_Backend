@@ -4,15 +4,24 @@ from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+from core.logging_utils import log_action
 from .models import CustomUser
 from .serializers import RegisterSerializer, UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    @log_action("вход в систему (login)")
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
 class RegisterView(APIView):
     permission_classes = []
 
+    @log_action("регистрация пользователя")
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -26,6 +35,8 @@ class RegisterView(APIView):
 
 
 class IsAdmin(permissions.BasePermission):
+
+    @log_action("проверка прав администратора")
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_admin
 
@@ -39,6 +50,7 @@ class UserListView(generics.ListAPIView):
 class UserDeleteView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
+    @log_action("удаление пользователя")
     def delete(self, request, user_id):
         try:
             user = CustomUser.objects.get(pk=user_id)
@@ -51,6 +63,7 @@ class UserDeleteView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @log_action("logout")
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -64,6 +77,7 @@ class LogoutView(APIView):
 class ToggleAdminView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
+    @log_action("изменение роли (is_admin)")
     def patch(self, request, user_id):
         try:
             user = CustomUser.objects.get(pk=user_id)
