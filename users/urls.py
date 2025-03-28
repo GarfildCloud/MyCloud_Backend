@@ -10,13 +10,14 @@ from users.views import (
     UserListView,
     UserDeleteView,
     ToggleAdminView,
-    CustomTokenObtainPairView, UserMeView)
+    CustomTokenObtainPairView, UserMeView, UserDetailView)
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('all/', UserListView.as_view(), name='user-list'),
-    path('<int:user_id>/', UserDeleteView.as_view(), name='user-delete'),
+    path('<int:pk>/', UserDetailView.as_view()),  # ✅ GET + DELETE
+
     path('me/', UserMeView.as_view(), name='user-me'),
 
     # JWT

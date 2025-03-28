@@ -61,10 +61,10 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
+    "http://localhost",  # Vite dev server
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost",
 ]
 
 ROOT_URLCONF = 'backend.urls'

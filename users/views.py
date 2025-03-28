@@ -1,7 +1,9 @@
 from django.contrib.auth import logout
+from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions, generics
 from rest_framework.decorators import permission_classes, api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -100,3 +102,19 @@ class UserMeView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class UserDetailView(APIView):
+    permission_classes = [IsAdminUser]
+
+    @log_action("получение данных о пользователе")
+    def get(self, request, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    @log_action("удаление пользователя")
+    def delete(self, request, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

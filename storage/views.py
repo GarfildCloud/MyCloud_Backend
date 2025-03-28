@@ -130,5 +130,7 @@ class RegenerateLinkView(APIView):
 
         return Response({
             "id": file.id,
-            "special_link": str(file.special_link)
+            "special_link": str(file.special_link),
+            "download_url": request.build_absolute_uri(f"/api/v1/storage/public/{file.special_link}/")
+
         }, status=status.HTTP_200_OK)
