@@ -93,3 +93,10 @@ class ToggleAdminView(APIView):
             }, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"detail": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+class UserMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)

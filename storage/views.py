@@ -1,7 +1,9 @@
 import logging
+import os
 import uuid
 
 from django.http import Http404, FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from rest_framework import generics, permissions, status
@@ -51,6 +53,24 @@ class FileDetailView(generics.RetrieveUpdateDestroyAPIView):
         if file.owner != user and not user.is_admin:
             raise PermissionDenied("У вас нет доступа к этому файлу.")
         return file
+
+    @log_action("удаление файла")
+    def delete(self, request, pk):
+        file = get_object_or_404(File, id=pk)
+
+        # Только владелец или администратор может удалить файл
+        if file.owner != request.user and not request.user.is_admin:
+            return Response(
+                {"detail": "У вас нет прав для удаления этого файла."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Удаляем физический файл, если он существует
+        if file.stored_file and os.path.isfile(file.stored_file.path):
+            os.remove(file.stored_file.path)
+
+        file.delete()
+        return Response({"detail": "Файл успешно удалён."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class FileDownloadView(APIView):
