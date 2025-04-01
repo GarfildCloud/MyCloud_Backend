@@ -1,5 +1,5 @@
-# Используем официальный образ Python 3.13
-FROM python:3.13-slim
+# Используем официальный образ Python 3.12
+FROM python:3.12-slim
 
 # Устанавливаем системные зависимости для PostgreSQL
 RUN apt-get update && apt-get install -y \
@@ -18,9 +18,6 @@ RUN mkdir -p /app/static
 
 # Копируем весь проект
 COPY . .
-
-# Собираем статику Django
-RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
