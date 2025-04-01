@@ -188,39 +188,37 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/app/logs/backend.log',
-            'formatter': 'default',
-        },
     },
 
     'loggers': {
+        # Основной логгер проекта (для декораторов и общих событий)
         'core': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
+        # Логика по загрузке файлов
         'storage': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
+        # Логика пользователей
         'users': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
+        # Django-системные сообщения (миграции, ошибки и т.п.)
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'WARNING',
             'propagate': True,
         },
     },
 
     'root': {
-        'handlers': ['console', 'file'],  # ← тоже в оба места
+        'handlers': ['console'],
         'level': LOG_LEVEL,
     },
 }
