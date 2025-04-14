@@ -1,4 +1,4 @@
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions, generics
 from rest_framework.decorators import permission_classes, api_view
@@ -28,16 +28,46 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }, status=status.HTTP_201_CREATED)
+            login(request, user)
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class IsAdmin(permissions.BasePermission):
+class LoginView(APIView):
+    permission_classes = []
 
+    @log_action("вход в систему")
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        if not username or not password:
+            return Response(
+                {"detail": "Необходимо указать username и password"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = CustomUser.objects.filter(username=username).first()
+        if user and user.check_password(password):
+            login(request, user)
+            return Response(UserSerializer(user).data)
+        
+        return Response(
+            {"detail": "Неверные учетные данные"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @log_action("выход из системы")
+    def post(self, request):
+        logout(request)
+        return Response({"detail": "Выход выполнен успешно"})
+
+
+class IsAdmin(permissions.BasePermission):
     @log_action("проверка прав администратора")
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_admin
@@ -62,20 +92,6 @@ class UserDeleteView(APIView):
             return Response({"detail": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
 
 
-class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @log_action("logout")
-    def post(self, request):
-        try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response({"detail": "Выход выполнен, токен заблокирован"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"detail": "Ошибка при выходе: " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ToggleAdminView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
@@ -96,12 +112,14 @@ class ToggleAdminView(APIView):
         except CustomUser.DoesNotExist:
             return Response({"detail": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
 
+
 class UserMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
 
 class UserDetailView(APIView):
     permission_classes = [IsAdminUser]
