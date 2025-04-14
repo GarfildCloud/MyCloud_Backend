@@ -1,6 +1,5 @@
-/users/migrations/
-/storage/migrations/
 /media/*
 /.idea/
 .env
 /static/
+*/__pycache__/
