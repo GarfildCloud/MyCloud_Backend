@@ -13,21 +13,21 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv('ENV', True)
 
-ALLOWED_HOSTS = ['localhost']
+# Настройка хостов в зависимости от окружения
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 # Application definition
 
@@ -56,14 +56,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Настройка CORS в зависимости от окружения
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173"
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173"
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173').split(',')
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -134,6 +130,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+USE_X_FORWARDED_HOST = True
+API_PREFIX = os.getenv('API_PREFIX', "/api")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -149,12 +147,12 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Session settings
+# Настройка безопасности сессий в зависимости от окружения
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+# SESSION_COOKIE_SECURE = not IS_DEVELOPMENT  # True в production
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', '1209600'))  # 2 недели по умолчанию
 
 AUTH_USER_MODEL = 'users.CustomUser'
 

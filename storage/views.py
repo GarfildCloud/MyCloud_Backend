@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+import mimetypes
 
 from django.http import Http404, FileResponse
 from django.shortcuts import get_object_or_404
@@ -40,13 +41,11 @@ class FileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
-    @log_action("скачивание файла владельцем/админом")
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return FileSerializer
         return FileUpdateSerializer
 
-    @log_action("скачивание файла владельцем/админом")
     def get_object(self):
         file = super().get_object()
         user = self.request.user
@@ -107,8 +106,18 @@ class FilePublicDownloadView(APIView):
         file.last_download = timezone.now()
         file.save(update_fields=["last_download"])
 
-        response = FileResponse(file.stored_file.open("rb"), as_attachment=True)
-        response["Content-Disposition"] = f'attachment; filename="{smart_str(file.original_name)}"'
+        file_path = file.stored_file.path
+        file_handle = file.stored_file.open("rb")
+
+        # Угадываем MIME-тип по расширению файла
+        content_type, _ = mimetypes.guess_type(file.original_name)
+        if not content_type:
+            content_type = "application/octet-stream"  # по умолчанию
+
+        response = FileResponse(file_handle, content_type=content_type)
+        
+        response["Content-Disposition"] = f'inline; filename="{smart_str(file.original_name)}"'
+        
         return response
 
 

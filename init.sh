@@ -31,6 +31,7 @@ if not User.objects.filter(username='Administrator').exists():
 else:
     print('Superuser already exists')
 END
+
 # Создаем суперпользователя - Netology
 echo "Creating Netology user..."
 python manage.py shell << END

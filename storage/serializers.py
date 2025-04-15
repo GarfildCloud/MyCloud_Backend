@@ -1,5 +1,6 @@
 import hashlib
 
+from django.conf import settings
 from django.utils.timezone import localtime
 from rest_framework import serializers
 from .models import File
@@ -46,11 +47,12 @@ class FileSerializer(serializers.ModelSerializer):
         if request is None:
             return None
         return request.build_absolute_uri(
-            f"/api/v1/storage/public/{obj.special_link}/"
+            f"{settings.API_PREFIX}/storage/public/{obj.special_link}/"
         )
 
+
     def format_datetime(self, dt):
-        return localtime(dt).strftime("%Y-%m-%d %H:%M") if dt else None
+        return localtime(dt).strftime("%d.%m.%Y %H:%M") if dt else None
 
     def get_upload_date(self, obj):
         return self.format_datetime(obj.upload_date)
