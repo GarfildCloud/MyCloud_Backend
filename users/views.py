@@ -1,30 +1,29 @@
 from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions, generics
-from rest_framework.decorators import permission_classes, api_view
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from core.logging_utils import log_action
 from .models import CustomUser
 from .serializers import RegisterSerializer, UserSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    @log_action("вход в систему (login)")
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+from django.contrib.auth import logout
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_GET
 
 
 class RegisterView(APIView):
     permission_classes = []
+    authentication_classes = []
 
     @log_action("регистрация пользователя")
     def post(self, request):
+        print(request.data)
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -57,14 +56,10 @@ class LoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-
-class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @log_action("выход из системы")
-    def post(self, request):
-        logout(request)
-        return Response({"detail": "Выход выполнен успешно"})
+@require_GET
+def custom_logout(request):
+    logout(request)  # Завершает сессию
+    return JsonResponse({"detail": "Successfully logged out."}, status=200)
 
 
 class IsAdmin(permissions.BasePermission):
@@ -133,6 +128,7 @@ class UserDetailView(APIView):
     @log_action("удаление пользователя")
     def delete(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
+        # Удаляем пользователя
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
