@@ -1,6 +1,7 @@
 import hashlib
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils.timezone import localtime
 from rest_framework import serializers
 from .models import File
@@ -46,9 +47,8 @@ class FileSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request is None:
             return None
-        return self.context["request"].build_absolute_uri(
-            f"{settings.API_PREFIX}/storage/public/{obj.special_link}/"
-        )
+        relative_url = reverse("file-public-download", kwargs={"uuid": str(obj.special_link)})
+        return request.build_absolute_uri(relative_url)
 
 
 
