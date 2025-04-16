@@ -3,6 +3,7 @@ import os
 import uuid
 import mimetypes
 
+from django.conf import settings
 from django.http import Http404, FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -140,6 +141,8 @@ class RegenerateLinkView(APIView):
         return Response({
             "id": file.id,
             "special_link": str(file.special_link),
-            "download_url": request.build_absolute_uri(f"/api/v1/storage/public/{file.special_link}/")
+            "download_url": request.build_absolute_uri(
+                f"{settings.API_PREFIX}/storage/public/{file.special_link}/"
+            )
 
         }, status=status.HTTP_200_OK)
