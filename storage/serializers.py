@@ -46,9 +46,10 @@ class FileSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request is None:
             return None
-        return request.build_absolute_uri(
+        return self.context["request"].build_absolute_uri(
             f"{settings.API_PREFIX}/storage/public/{obj.special_link}/"
         )
+
 
 
     def format_datetime(self, dt):

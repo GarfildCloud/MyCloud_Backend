@@ -168,21 +168,29 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
             'formatter': 'default',
+            'level': LOG_LEVEL,
         },
     },
     'loggers': {
-        'core': {
-            'handlers': ['console'],
+        'django': {
+            'handlers': ['file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'storage': {
+            'handlers': ['file'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
-        'storage': {
-            'handlers': ['console'],
+        'users': {
+            'handlers': ['file'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
     },
 }
+

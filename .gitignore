@@ -3,3 +3,4 @@
 .env
 /static/
 */__pycache__/
+Logs/*
